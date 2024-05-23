@@ -1,0 +1,127 @@
+﻿@page "/CadastrarMusica"
+@inject ArtistasAPI artistasAPI
+@inject GeneroAPI generoAPI
+@inject MusicasAPI musicasAPI
+@inject NavigationManager navigationManager
+
+<MudPaper Class="px-8 pt-2 pb-4 mx-12 my-8" Justify="Justify.Center">
+
+    <MudText Class="mt-8" Typo="Typo.h4">Cadastro de Música</MudText>
+
+    <MudForm>
+
+        <MudTextField Class="mt-4" T="string" Placeholder="Nome da música/canção"
+                      @bind-Value="nome"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      RequiredError="Campo obrigatório." />
+
+        <MudSelect Class="mt-4" T="ArtistaResponse" Label="Artistas"
+                   Variant="Variant.Outlined" ValueChanged="ArtistaSelecionado" AnchorOrigin="Origin.BottomCenter">
+            @if (Artistas is not null)
+            {
+                @foreach (var artista in Artistas)
+                {
+                    <MudSelectItem Value="artista" />
+                }
+            }
+        </MudSelect>
+
+        <MudTextField Class="mt-4" Placeholder="Ano de lançamento"
+                      @bind-Value="anoLancamento"
+                      Variant="Variant.Outlined"
+                      Lines="1"
+                      Required="true"
+                      RequiredError="Campo obrigatório." />
+
+        <MudSelect Class="mt-4" T="GeneroResponse" Label="Gêneros"
+                   Variant="Variant.Outlined" ValueChanged="GeneroSelecionado" AnchorOrigin="Origin.BottomCenter">
+            @if (Generos is not null)
+            {
+                @foreach (var genero in Generos)
+                {
+                    <MudSelectItem Value="genero" />
+                }
+            }
+            @if (GenerosSelecionados is not null)
+            {
+                foreach (var genero in GenerosSelecionados)
+                {
+                    <MudAlert Severity="Severity.Info">@(genero.Nome) adicionado como gênero.</MudAlert>
+                }
+            }
+        </MudSelect>
+
+        <div class="d-flex align-center justify-space-between mt-4">
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       @onclick="Cadastrar"
+                       Class="ml-auto">
+                Cadastrar
+            </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Info"
+                       @onclick="Voltar"
+                       Class="ml-3">
+                Voltar
+            </MudButton>
+        </div>
+
+    </MudForm>
+
+</MudPaper>
+
+
+@code {
+    private int anoLancamento;
+    private string? nome;
+
+    private ICollection<ArtistaResponse>? Artistas { get; set; }
+    private ICollection<GeneroResponse>? Generos { get; set; }
+
+    private List<GeneroResponse>? GenerosSelecionados { get; set; } = new();
+    private ArtistaResponse? ArtistaDaMusica { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Artistas = await artistasAPI.GetArtistasAsync();
+        Generos = await generoAPI.GetGenerosAsync();
+    }
+
+    private void ArtistaSelecionado(ArtistaResponse artista)
+    {
+        ArtistaDaMusica = artista;
+    }
+
+    private void GeneroSelecionado(GeneroResponse genero)
+    {
+        if (GenerosSelecionados is not null)
+        {
+            if (!GenerosSelecionados.Contains(genero))
+            {
+                GenerosSelecionados.Add(genero);
+            }
+        }
+    }
+
+    private List<GeneroRequest> GenerosRequest { get; set; } = new();
+    public async Task Cadastrar()
+    {
+        if (GenerosSelecionados is not null)
+        {
+            foreach(var genero in GenerosSelecionados)
+            {
+                GenerosRequest.Add(new GeneroRequest(genero.Nome, genero.Descricao));
+            }
+        }
+
+        var musicaRequest = new MusicaRequest(nome!, ArtistaDaMusica!.Id, anoLancamento, GenerosRequest);
+        await musicasAPI.AddMusicaAsync(musicaRequest);
+        navigationManager.NavigateTo("/MusicasPorArtista");
+    }
+
+    private void Voltar()
+    {
+        navigationManager.NavigateTo("/MusicasPorArtista");
+    }
+}
