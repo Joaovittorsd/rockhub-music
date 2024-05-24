@@ -1,6 +1,12 @@
 ﻿@page "/MusicasPorArtista"
 @inject MusicasAPI musicasAPI
 
+
+<audio controls>
+    <source src="audio/slipknot.mp3" type="audio/mpeg">
+    Seu navegador não suporta a reprodução de áudio.
+</audio>
+
 <MudStack Class="mt-4 mb-4" Row="true" Justify="Justify.SpaceBetween">
     <MudText Class="mb-4" Typo="Typo.h4">Músicas cadastradas</MudText>
     <MudPagination Count="@totalPaginas" SelectedChanged="PaginaMudou"></MudPagination>
