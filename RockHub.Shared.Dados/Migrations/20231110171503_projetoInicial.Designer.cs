@@ -11,7 +11,7 @@ using RockHub.Shared.Dados.Banco;
 
 namespace ScreenSound.Migrations
 {
-    [DbContext(typeof(ScreenSoundContext))]
+    [DbContext(typeof(RockHubContext))]
     [Migration("20231110171503_projetoInicial")]
     partial class projetoInicial
     {

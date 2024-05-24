@@ -12,7 +12,7 @@ using RockHub.Shared.Dados.Banco;
 
 namespace ScreenSound.Migrations
 {
-    [DbContext(typeof(ScreenSoundContext))]
+    [DbContext(typeof(RockHubContext))]
     [Migration("20231110182035_AdicionarColunaAnoLancamento")]
     partial class AdicionarColunaAnoLancamento
     {

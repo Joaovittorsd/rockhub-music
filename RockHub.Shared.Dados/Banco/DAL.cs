@@ -1,9 +1,9 @@
 ﻿namespace RockHub.Shared.Dados.Banco;
 public class DAL<T> where T : class
 {
-    private readonly ScreenSoundContext context;
+    private readonly RockHubContext context;
 
-    public DAL(ScreenSoundContext context)
+    public DAL(RockHubContext context)
     {
         this.context = context;
     }

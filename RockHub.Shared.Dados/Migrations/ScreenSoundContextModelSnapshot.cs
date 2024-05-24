@@ -11,7 +11,7 @@ using RockHub.Shared.Dados.Banco;
 
 namespace ScreenSound.Migrations
 {
-    [DbContext(typeof(ScreenSoundContext))]
+    [DbContext(typeof(RockHubContext))]
     partial class ScreenSoundContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

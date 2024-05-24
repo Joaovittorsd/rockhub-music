@@ -12,7 +12,7 @@ using RockHub.Shared.Dados.Banco;
 
 namespace ScreenSound.Migrations
 {
-    [DbContext(typeof(ScreenSoundContext))]
+    [DbContext(typeof(RockHubContext))]
     [Migration("20231128015225_AdicaoDaTabelaGenero")]
     partial class AdicaoDaTabelaGenero
     {
