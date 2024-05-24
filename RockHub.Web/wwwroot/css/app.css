@@ -107,3 +107,8 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+.center-audio {
+    display: flex !important; 
+    justify-content: center !important;
+}

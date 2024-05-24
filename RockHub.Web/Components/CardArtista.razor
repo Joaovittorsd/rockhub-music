@@ -17,6 +17,14 @@
         <MudText Typo="Typo.body2" Title=@Artista!.Bio>@TruncateText(Artista!.Bio, 100)</MudText>
         <MudRating ReadOnly="true" SelectedValue="5" />
     </MudCardContent>
+    <MudCardContent>
+        <div class="center-audio">
+            <audio controls>
+                <source src="audio/slipknot.mp3" type="audio/mpeg">
+                Seu navegador não suporta a reprodução de áudio.
+            </audio>
+        </div>
+    </MudCardContent>
     <MudCardActions>
         <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default"/>
         <MudIconButton Icon="@Icons.Material.Filled.Album" Color="Color.Default" />
@@ -27,8 +35,9 @@
     [Parameter]
     public ArtistaResponse? Artista { get; set; }
 
-    public string? Imagem { get; set; }
     private string favoriteIconClass = "icon-favorite";
+
+    public string? Imagem { get; set; }
 
     protected override void OnInitialized()
     {
