@@ -42,7 +42,7 @@ var app = builder.Build();
 app.UseCors("wasm");
 
 app.UseStaticFiles();
-app.UseAuthentication();
+app.UseAuthorization();
 
 app.AddEndPointsArtistas();
 app.AddEndPointsMusicas();

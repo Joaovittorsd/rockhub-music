@@ -10,14 +10,15 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddMudServices();
 
-builder.Services.AddTransient<ArtistasAPI>();
-builder.Services.AddTransient<MusicasAPI>();
-builder.Services.AddTransient<GeneroAPI>();
-builder.Services.AddTransient<AuthAPI>();
+builder.Services.AddScoped<CookieHandler>();
+builder.Services.AddScoped<ArtistasAPI>();
+builder.Services.AddScoped<MusicasAPI>();
+builder.Services.AddScoped<GeneroAPI>();
+builder.Services.AddScoped<AuthAPI>();
 
 builder.Services.AddHttpClient("API", client => {
     client.BaseAddress = new Uri(builder.Configuration["APIServer:Url"]!);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
-});
+}).AddHttpMessageHandler<CookieHandler>();
 
 await builder.Build().RunAsync();
