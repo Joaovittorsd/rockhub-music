@@ -7,15 +7,18 @@ namespace RockHub.Web.Services;
 
 public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 {
+    private bool autenticado = false;
     private readonly HttpClient _httpClient = factory.CreateClient("API");
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        autenticado = false;
         var pessoa = new ClaimsPrincipal();
-        var info = await _httpClient.GetFromJsonAsync<InfoPessoaResponse>("auth/manage/info");
+        var response = await _httpClient.GetAsync("auth/manage/info");
 
-        if (info is not null)
+        if (response.IsSuccessStatusCode)
         {
+            var info = await response.Content.ReadFromJsonAsync<InfoPessoaResponse>();
             Claim[] dados =
                 [
                     new Claim(ClaimTypes.Name, info.Email),
@@ -23,6 +26,7 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
                 ];
             var identity = new ClaimsIdentity(dados, "Cookies");
             pessoa = new ClaimsPrincipal(identity);
+            autenticado = true;
         }
 
         return new AuthenticationState(pessoa);
@@ -38,9 +42,22 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 
         if (response.IsSuccessStatusCode)
         {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             return new AuthResponse { Sucesso = true };
         }
 
         return new AuthResponse { Sucesso = false, Erros = ["Login/senha inválidos"] };
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _httpClient.PostAsync("auth/logout", null);
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+    } 
+
+    public async Task<bool> VerificaAutenticado()
+    {
+        await GetAuthenticationStateAsync();
+        return autenticado;
     }
 }
