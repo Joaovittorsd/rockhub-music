@@ -11,6 +11,10 @@ public static class GeneroExtensions
 
     public static void AddEndPointGeneros(this WebApplication app)
     {
+        var grupoBuilder = app.MapGroup("generos")
+            .RequireAuthorization()
+            .WithTags("Gêneros");
+
         #region Endpoint Gênero musical
 
         /// <summary>
@@ -20,11 +24,10 @@ public static class GeneroExtensions
         /// <param name="generoReq">Dados do gênero a ser criado.</param>
         /// <returns>Retorna 200 (OK) se o gênero for adicionado com sucesso.</returns>
         /// <remarks>Este método usa injeção de dependência para obter a instância de DAL. Ele converte os dados da requisição em uma entidade de gênero e a adiciona ao banco de dados.</remarks>
-        app.MapPost("/Generos", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoReq) =>
+        grupoBuilder.MapPost("", ([FromServices] DAL<Genero> dal, [FromBody] GeneroRequest generoReq) =>
         {
             dal.Adicionar(RequestToEntity(generoReq));
         });
-
 
         /// <summary>
         /// Endpoint para obter uma lista de gêneros.
@@ -32,7 +35,7 @@ public static class GeneroExtensions
         /// <param name="dal">Instância de DAL para acessar os dados dos gêneros.</param>
         /// <returns>Retorna uma lista de gêneros.</returns>
         /// <remarks>Este método usa injeção de dependência para obter a instância de DAL e retorna a lista de gêneros disponíveis.</remarks>
-        app.MapGet("/Generos", ([FromServices] DAL<Genero> dal) =>
+        grupoBuilder.MapGet("", ([FromServices] DAL<Genero> dal) =>
         {
             return EntityListToResponseList(dal.Listar());
         });
@@ -44,7 +47,7 @@ public static class GeneroExtensions
         /// <param name="nome">Nome do gênero a ser buscado.</param>
         /// <returns>Retorna os dados do gênero se encontrado. Se o gênero não for encontrado, retorna 404 (Not Found).</returns>
         /// <remarks>Este método usa injeção de dependência para obter a instância de DAL. Ele busca um gênero pelo nome fornecido, realizando uma busca case-insensitive.</remarks>
-        app.MapGet("/Generos/{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
+        grupoBuilder.MapGet("{nome}", ([FromServices] DAL<Genero> dal, string nome) =>
         {
             var genero = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (genero is not null)
@@ -62,7 +65,7 @@ public static class GeneroExtensions
         /// <param name="id">ID do gênero a ser excluído.</param>
         /// <returns>Retorna 204 (No Content) se o gênero for excluído com sucesso. Se o gênero não for encontrado, retorna 404 (Not Found).</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter a instância de DAL e exclui o gênero correspondente ao ID fornecido.</remarks>
-        app.MapDelete("/Generos/{id}", ([FromServices] DAL<Genero> dal, int id) =>
+        grupoBuilder.MapDelete("{id}", ([FromServices] DAL<Genero> dal, int id) =>
         {
             var genero = dal.RecuperarPor(a => a.Id == id);
             if (genero is null)

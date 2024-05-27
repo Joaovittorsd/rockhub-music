@@ -10,15 +10,18 @@ public static class MusicasExtensions
 {
     public static void AddEndPointsMusicas(this WebApplication app)
     {
-        #region Endpoint Músicas
+        var grupoBuilder = app.MapGroup("musicas")
+           .RequireAuthorization()
+           .WithTags("Músicas");
 
+        #region Endpoint Músicas
         /// <summary>
         /// Endpoint para obter uma lista de músicas.
         /// </summary>
         /// <param name="dal">Instância de DAL para acessar os dados das músicas.</param>
         /// <returns>Retorna uma lista de músicas. Se não houver músicas, retorna 404 (Not Found).</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter a instância de DAL e retorna a lista de músicas disponíveis.</remarks>
-        app.MapGet("/Musicas", ([FromServices] DAL<Musica> dal) =>
+        grupoBuilder.MapGet("", ([FromServices] DAL<Musica> dal) =>
         {
             var musicaList = dal.Listar();
             if (musicaList is null)
@@ -36,7 +39,7 @@ public static class MusicasExtensions
         /// <param name="nome">Nome da música a ser buscada.</param>
         /// <returns>Retorna os dados da música se encontrada. Se a música não for encontrada, retorna 404 (Not Found).</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter a instância de DAL e busca uma música pelo nome fornecido, realizando uma busca case-insensitive.</remarks>
-        app.MapGet("/Musicas/{nome}", ([FromServices] DAL<Musica> dal, string nome) =>
+        grupoBuilder.MapGet("{nome}", ([FromServices] DAL<Musica> dal, string nome) =>
         {
             var musica = dal.RecuperarPor(a => a.Nome.ToUpper().Equals(nome.ToUpper()));
             if (musica is null)
@@ -54,7 +57,7 @@ public static class MusicasExtensions
         /// <param name="musicaRequest">Dados da música a ser criada.</param>
         /// <returns>Retorna 200 (OK) se a música for adicionada com sucesso.</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter as instâncias de DAL e converte os dados da requisição em uma entidade de música para adicionar ao banco de dados.</remarks>
-        app.MapPost("/Musicas", ([FromServices] DAL<Musica> dal, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
+        grupoBuilder.MapPost("", ([FromServices] DAL<Musica> dal, [FromServices] DAL<Genero> dalGenero, [FromBody] MusicaRequest musicaRequest) =>
         {
             var musica = new Musica(musicaRequest.nome)
             {
@@ -75,7 +78,7 @@ public static class MusicasExtensions
         /// <param name="id">ID da música a ser excluída.</param>
         /// <returns>Retorna 204 (No Content) se a música for excluída com sucesso. Se a música não for encontrada, retorna 404 (Not Found).</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter a instância de DAL e exclui a música correspondente ao ID fornecido.</remarks>
-        app.MapDelete("/Musicas/{id}", ([FromServices] DAL<Musica> dal, int id) =>
+        grupoBuilder.MapDelete("{id}", ([FromServices] DAL<Musica> dal, int id) =>
         {
             var musica = dal.RecuperarPor(a => a.Id == id);
             if (musica is null)
@@ -93,7 +96,7 @@ public static class MusicasExtensions
         /// <param name="musicaRequestEdit">Dados da música a ser atualizada, incluindo o ID da música.</param>
         /// <returns>Retorna 200 (OK) se a música for atualizada com sucesso. Se a música não for encontrada, retorna 404 (Not Found).</returns>
         /// <remarks>Este método utiliza injeção de dependência para obter a instância de DAL. Ele atualiza o nome e o ano de lançamento da música existente com os novos dados fornecidos.</remarks>
-        app.MapPut("/Musicas", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
+        grupoBuilder.MapPut("", ([FromServices] DAL<Musica> dal, [FromBody] MusicaRequestEdit musicaRequestEdit) =>
         {
             var musicaAAtualizar = dal.RecuperarPor(a => a.Id == musicaRequestEdit.Id);
             if (musicaAAtualizar is null)

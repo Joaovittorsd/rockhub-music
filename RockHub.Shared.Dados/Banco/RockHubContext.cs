@@ -1,8 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using RockHub.Shared.Dados.Modelos;
 using RockHub.Shared.Modelos.Modelos;
 
 namespace RockHub.Shared.Dados.Banco;
-public class RockHubContext : DbContext
+public class RockHubContext : IdentityDbContext<PessoaComAcesso, PerfilDeAcesso, int>
 {
     public DbSet<Artista> Artistas { get; set; }
     public DbSet<Musica> Musicas { get; set; }
@@ -28,6 +30,7 @@ public class RockHubContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Musica>()
             .HasMany(c => c.Generos)
             .WithMany(c => c.Musicas);
