@@ -15,7 +15,7 @@
     </MudCardHeader>
     <MudCardContent>
         <MudText Typo="Typo.body2" Title=@Artista!.Bio>@TruncateText(Artista!.Bio, 100)</MudText>
-        <MudRating ReadOnly="true" SelectedValue="5" />
+        <MudRating ReadOnly="true" SelectedValue="@Convert.ToInt32(Artista!.Classificacao)" />
     </MudCardContent>
     <MudCardContent>
         <div class="center-audio">

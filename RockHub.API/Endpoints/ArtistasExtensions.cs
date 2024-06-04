@@ -2,7 +2,9 @@
 using RockHub.API.Requests;
 using RockHub.API.Response;
 using RockHub.Shared.Dados.Banco;
+using RockHub.Shared.Dados.Modelos;
 using RockHub.Shared.Modelos.Modelos;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Web;
 
@@ -119,6 +121,100 @@ public static class ArtistasExtensions
             dal.Atualizar(artistaAAtualizar);
             return Results.Ok();
         });
+
+
+        /// <summary>
+        /// Endpoint para adicionar ou atualizar a avaliação de um artista.
+        /// </summary>
+        /// <param name="context">Instância de HttpContext para acessar informações da requisição e do usuário.</param>
+        /// <param name="request">Dados da avaliação do artista, incluindo o ID do artista e a nota.</param>
+        /// <param name="dalArtista">Instância de DAL para acessar os dados dos artistas.</param>
+        /// <param name="dalPessoa">Instância de DAL para acessar os dados das pessoas com acesso.</param>
+        /// <returns>
+        /// Retorna 201 (Created) se a avaliação for adicionada ou atualizada com sucesso.
+        /// Se o artista não for encontrado, retorna 404 (Not Found).
+        /// Se a pessoa não estiver conectada, lança uma InvalidOperationException.
+        /// </returns>
+        /// <remarks>
+        /// Este método utiliza injeção de dependência para obter as instâncias de DAL para artistas e pessoas.
+        /// Ele verifica se o artista existe e se a pessoa está conectada através do e-mail nos claims do usuário.
+        /// Se uma avaliação para o artista e a pessoa já existe, ela é atualizada; caso contrário, uma nova avaliação é adicionada.
+        /// </remarks>
+        grupoBuilder.MapPost("avaliacao", (
+            HttpContext context,
+            [FromBody] AvaliacaoArtistaRequest request,
+            [FromServices] DAL<Artista> dalArtista,
+            [FromServices] DAL<PessoaComAcesso> dalPessoa
+            ) =>
+        {
+            var artista = dalArtista.RecuperarPor(a => a.Id == request.ArtistaId);
+            if (artista is null) return Results.NotFound();
+
+            var email = context.User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var pessoa = dalPessoa
+                .RecuperarPor(p => p.Email!.Equals(email))
+                ?? throw new InvalidOperationException("Pessoa não está conectada");
+
+            var avaliacao = artista.Avaliacoes
+                .FirstOrDefault(a => a.ArtistaId == artista.Id && a.PessoaId == pessoa.Id);
+
+            if (avaliacao is null)
+            {
+                artista.AdicionarNota(pessoa.Id, request.Nota);
+            }
+            else
+            {
+                avaliacao.Nota = request.Nota;
+            }
+
+            dalArtista.Atualizar(artista);
+
+            return Results.Created();
+        });
+
+        /// <summary>
+        /// Endpoint para recuperar a avaliação de um artista específica para a pessoa logada.
+        /// </summary>
+        /// <param name="id">ID do artista cujas avaliações serão recuperadas.</param>
+        /// <param name="context">Instância de HttpContext para acessar informações da requisição e do usuário.</param>
+        /// <param name="dalArtista">Instância de DAL para acessar os dados dos artistas.</param>
+        /// <param name="dalPessoa">Instância de DAL para acessar os dados das pessoas com acesso.</param>
+        /// <returns>
+        /// Retorna 200 (OK) com a avaliação do artista.
+        /// Se o artista não for encontrado, retorna 404 (Not Found).
+        /// Se a pessoa não estiver conectada ou seu e-mail não for encontrado, lança uma InvalidOperationException.
+        /// </returns>
+        /// <remarks>
+        /// Este método utiliza injeção de dependência para obter as instâncias de DAL para artistas e pessoas.
+        /// Ele verifica se o artista existe e se a pessoa está conectada através do e-mail nos claims do usuário.
+        /// Se uma avaliação para o artista e a pessoa já existe, ela é retornada; caso contrário, é retornada uma avaliação com nota zero.
+        /// </remarks>
+        grupoBuilder.MapGet("{id}/avaliacao", (
+            int id, 
+            HttpContext context, 
+            [FromServices] DAL<Artista> dalArtista, 
+            [FromServices] DAL<PessoaComAcesso> dalPessoa) =>
+        {
+            var artista = dalArtista.RecuperarPor(a => a.Id == id);
+            if (artista is null) return Results.NotFound();
+
+            var email = context.User.Claims
+                .FirstOrDefault(c => c.Type.Equals(ClaimTypes.Email))?.Value
+                ?? throw new InvalidOperationException("Não foi encontrado o email da pessoa logada");
+
+            var pessoa = dalPessoa.RecuperarPor(p => p.Email!.Equals(email))
+                ?? throw new InvalidOperationException("Não foi encontrado o email da pessoa logada");
+
+            var avaliacao = artista
+                .Avaliacoes
+                .FirstOrDefault(a => a.ArtistaId == id && a.PessoaId == pessoa.Id);
+
+            if (avaliacao is null) return Results.Ok(new AvaliacaoArtistaResponse(id, 0));
+            else return Results.Ok(new AvaliacaoArtistaResponse(id, avaliacao.Nota));
+        });
         #endregion
     }
 
@@ -136,6 +232,13 @@ public static class ArtistasExtensions
 
     private static ArtistaResponse EntityToResponse(Artista artista)
     {
-        return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil);
+        return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil)
+        {
+            Classificacao = artista
+                .Avaliacoes
+                .Select(a => a.Nota)
+                .DefaultIfEmpty(0)
+                .Average()
+        };
     }
 }
