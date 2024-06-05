@@ -1,7 +1,13 @@
 # RockHub
 
-Bem-vindo ao repositório do RockHub! desenvolvido em C# com ASP.NET Core utilizando Blazor para a interface do usuário. Este projeto é uma aplicação web destinada a gerenciar artistas e músicas.
-O projeto é destinado a ser um exemplo básico de uma aplicação web utilizando ASP.Net Core e pode servir como base para projetos mais complexos. 
+Bem-vindo! Este projeto foi desenvolvido em C# utilizando ASP.NET Core e Blazor para a interface do usuário. 
+Ele consiste em uma aplicação web integrada com uma API WEB, destinada ao gerenciamento de artistas, músicas, gêneros musicais e Albuns.
+
+## Descrição
+
+O RockHub é uma aplicação web construída para demonstrar uma solução completa de gerenciamento musical. 
+A aplicação inclui um frontend desenvolvido com Blazor e um backend robusto utilizando ASP.NET Core com uma API WEB. 
+Este projeto serve como um exemplo prático e pode ser usado como base para desenvolvimentos mais complexos.
 
 ## Funcionalidades
 
