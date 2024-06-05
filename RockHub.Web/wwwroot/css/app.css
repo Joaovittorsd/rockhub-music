@@ -109,6 +109,13 @@ code {
 }
 
 .center-audio {
-    display: flex !important; 
+    display: flex !important;
     justify-content: center !important;
+    align-items: center !important;
+}
+
+audio {
+    width: 300px !important;
+    border-radius: 10px !important;
+    padding: 10px !important;
 }

@@ -1,21 +1,24 @@
-﻿<MudCard>
-    <MudCardMedia Image=@Imagem/>
+﻿@inject ArtistasAPI artistasAPI
+@inject NavigationManager NavigationManager
+
+<MudCard>
+    <MudCardMedia Image=@Imagem />
     <MudCardHeader>
         <CardHeaderContent>
             <MudText Typo="Typo.h6">@Artista!.Nome</MudText>
         </CardHeaderContent>
         <CardHeaderActions>
             @{
-                string nomeDecodificado = HttpUtility.UrlEncode(Artista!.Nome);
+                string nomeCodificado = HttpUtility.UrlEncode(Artista!.Nome);
             }
             <MudIconButton Icon="@Icons.Material.Filled.Settings"
                            Color="Color.Default"
-                           Href=@($"/EditarArtista/{nomeDecodificado}") />
+                           Href=@($"/EditarArtista/{nomeCodificado}") />
         </CardHeaderActions>
     </MudCardHeader>
     <MudCardContent>
         <MudText Typo="Typo.body2" Title=@Artista!.Bio>@TruncateText(Artista!.Bio, 100)</MudText>
-        <MudRating ReadOnly="true" SelectedValue="@Convert.ToInt32(Artista!.Classificacao)" />
+        <MudRating @onclick="AvaliarArtista" @bind-SelectedValue="Classificacao" />
     </MudCardContent>
     <MudCardContent>
         <div class="center-audio">
@@ -26,7 +29,7 @@
         </div>
     </MudCardContent>
     <MudCardActions>
-        <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default"/>
+        <MudIconButton Icon="@Icons.Material.Filled.Favorite" Color="Color.Default" />
         <MudIconButton Icon="@Icons.Material.Filled.Album" Color="Color.Default" />
     </MudCardActions>
 </MudCard>
@@ -34,14 +37,22 @@
 @code {
     [Parameter]
     public ArtistaResponse? Artista { get; set; }
+    public int Classificacao { get; set; }
 
     private string favoriteIconClass = "icon-favorite";
-
     public string? Imagem { get; set; }
 
     protected override void OnInitialized()
     {
-        Imagem = Artista!.FotoPerfil!.Contains("Foto") ? $"https://localhost:7089/{Artista!.FotoPerfil}" : "images/cardArtista.png";
+        if (Artista != null)
+        {
+            Imagem = Artista.FotoPerfil!.Contains("Foto") ? $"https://localhost:7089/{Artista.FotoPerfil}" : "images/cardArtista.png";
+            Classificacao = Convert.ToInt32(Artista.Classificacao);
+        }
+        else
+        {
+            Imagem = "images/cardArtista.png";
+        }
     }
 
     string TruncateText(string text, int maxLength)
@@ -52,5 +63,13 @@
         }
         return text;
     }
-}
 
+    private async Task AvaliarArtista()
+    {
+        if (Artista != null)
+        {
+            await artistasAPI.AvaliaArtistaAsync(Artista.Id, Classificacao);
+            NavigationManager.NavigateTo(NavigationManager.Uri, true);
+        }
+    }
+}
