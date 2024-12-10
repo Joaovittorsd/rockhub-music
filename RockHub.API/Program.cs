@@ -34,7 +34,7 @@ builder.Services.AddCors(
     options => options.AddPolicy(
         "wasm",
         policy => policy.WithOrigins([builder.Configuration["BackendUrl"] ?? "https://localhost:7089",
-            builder.Configuration["FrontendUrl"] ?? "https://localhost:7015"])
+            builder.Configuration["FrontendUrl"] ?? "http://localhost:7015"])
             .AllowAnyMethod()
             .SetIsOriginAllowed(pol => true)
             .AllowAnyHeader()

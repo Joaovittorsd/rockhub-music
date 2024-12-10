@@ -46,7 +46,7 @@
     {
         if (Artista != null)
         {
-            Imagem = Artista.FotoPerfil!.Contains("Foto") ? $"https://localhost:7089/{Artista.FotoPerfil}" : "images/cardArtista.png";
+            Imagem = Artista.FotoPerfil!.Contains("Foto") ? $"http://localhost:5241{Artista.FotoPerfil}" : "images/cardArtista.png";
             Classificacao = Convert.ToInt32(Artista.Classificacao);
         }
         else
